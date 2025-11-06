@@ -23,7 +23,9 @@ public:
     See the documentation for more information. */
     tutorial() :
         m_name()
-    {}
+    {
+        cout << "Constructor called" << m_name << mindev::endl;
+    }
 
     MIN_DESCRIPTION	{ "" };  // Description of the object
     MIN_TAGS		{ "" };  // Any tags to include
@@ -92,11 +94,10 @@ public:
     /* Create an attribute. They need a templated type, an owner, name, description, and function(MIN_FUNCTION)
     See the attributes section of the documentation for infomration on optional arguments such as mindev::title,
     mindev::description, and mindev::setter. */
-    mindev::attribute<int> m_greeting { this, "Number", 1};
+    mindev::attribute<int> m_greeting { this, "Numb", 1};
 
 private:
     mindev::string m_name;
 };
-
 
 MIN_EXTERNAL(tutorial);  // Wrap the class name in the MIN_EXTERNAL macro
