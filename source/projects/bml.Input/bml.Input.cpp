@@ -1,12 +1,15 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "c74_min.h"  // Must include to access min devkit
 #include "lsl_cpp.h"
 #include "bml-dsp/circular-buffer.h"
 #include <thread>
+#include <typeinfo>
 #include <memory>
 #include <sstream>
 #include <assert.h>
 
-namespace mindev = c74::min;  
+namespace mindev = c74::min;
 
 #include <mutex>
 #include <functional>
@@ -20,6 +23,7 @@ class BMLInput : public mindev::object<BMLInput>
 {
 
 public:
+
     BMLInput(const mindev::atoms& args = {}) :
         m_running(false),
         m_buffers(),
@@ -27,8 +31,9 @@ public:
         m_mess(),
         m_outlets(),
         m_dumpOutIndex(0),
-        //m_logsIndex(1),
-        m_numChannels(8)
+        m_numChannels(8),
+        m_streamPropValue(),
+        m_streamProperty()
     {
         if (args.size() > 0)
             m_numChannels = args[0];
@@ -41,11 +46,6 @@ public:
                 ss << "Info Out";
                 m_dumpOutIndex = i;
             }
-            /*else if (i == m_numChannels + 1)
-            {
-                ss << "Logs";               
-                m_logsIndex = i;
-            }*/
             else
             {
                 ss << "LSL Out " << i + 1;
@@ -62,21 +62,46 @@ public:
         }
     }
 
+    ~BMLInput()
+    {
+        if (m_streamProperty != nullptr)
+            delete m_streamProperty;
+
+        if (m_streamPropValue != nullptr)
+            delete m_streamPropValue;
+    }
+
     MIN_DESCRIPTION{ "" };  // Description of the object
     MIN_TAGS{ "" };  // Any tags to include
-    MIN_AUTHOR{ "" };  // Author of the objectcmake
+    MIN_AUTHOR{ "Daniel Ethridge" };  // Author of the objectcmake
     MIN_RELATED{ "" };  // Related Max Objects
 
     mindev::inlet<> toggle{ this, "Toggle on/off", "int" };
     mindev::inlet<> info{ this, "Info"};
-
-    //mindev::attribute<mindev::symbol> m_name{ this, "type", "EEG" };
 
     mindev::argument<int> channelsArg{ this, "channels", "Number of channels in the LSL stream.",
         MIN_ARGUMENT_FUNCTION
         {
             m_numChannels = arg;
         }
+    };
+
+    mindev::attribute<mindev::symbol> streamProperty{ this, "Property name", "",
+        mindev::setter { MIN_FUNCTION {
+            if (args.size() > 0)
+                m_streamProperty = new mindev::symbol(args[0]);
+
+            return args;
+        }}
+    };
+
+    mindev::attribute<mindev::symbol> streamPropValue { this, "Stream Name", "",
+        mindev::setter { MIN_FUNCTION {
+            if (args.size() > 0)
+                m_streamPropValue = new mindev::symbol(args[0]);
+            
+            return args;
+        }}
     };
 
     mindev::message<> get_data{ this, "bang", "LSL Data Out",
@@ -101,6 +126,16 @@ public:
     mindev::message<> on_off{ this, "int", "Turn LSL receiving on or off",
         MIN_FUNCTION
         {
+            if (m_streamProperty == nullptr)
+            {
+                mindev::atom outMessage("Property is null");
+                m_outlets[m_dumpOutIndex]->send(outMessage);
+            }
+            else
+            {
+                mindev::atom outMessage("Property is not null");
+                m_outlets[m_dumpOutIndex]->send(outMessage);
+            }
             if (inlet != DATA_INLET) return {};
 
             int input_received = args[0];  // Read inlet
@@ -184,7 +219,6 @@ public:
         std::vector<std::unique_ptr<BML::CircularBuffer>>& bufs,
         std::vector<std::unique_ptr<mindev::outlet<>>>& outlets)
     {
-        
         // Don't initialize more than one
         if (running)
         {
@@ -194,8 +228,7 @@ public:
 
         running = true;
 
-        std::vector<lsl::stream_info> results = lsl::resolve_stream("type", "EEG");
-
+        std::vector<lsl::stream_info> results = lsl::resolve_stream("name", "grace");
         m_lslInlet = std::make_unique<lsl::stream_inlet>(results.at(0));
 
         std::vector<float> samples;
@@ -211,10 +244,27 @@ public:
             }
         }
 
-
         m_lslInlet.reset();
         //outlets[m_logsIndex]->send("LSL connection closed.");
     }
+
+    // For testing purposes
+    std::string getStreamPropertyValue()
+    {
+        return *m_streamPropValue;
+    }
+
+    // For testing purposes
+    std::string getStreamProperty()
+    {
+        return *m_streamProperty;
+    }
+
+    int getNumChannels()
+    {
+        return m_numChannels;
+    }
+
 
 private:
     std::atomic_bool m_running;
@@ -225,8 +275,9 @@ private:
 
     std::vector<std::unique_ptr<mindev::outlet<>>> m_outlets;
     int m_dumpOutIndex;
-    //int m_logsIndex;
     int m_numChannels;
+    mindev::symbol* m_streamProperty;
+    mindev::symbol* m_streamPropValue;
 };
 
 MIN_EXTERNAL(BMLInput);  

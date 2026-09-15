@@ -13,7 +13,7 @@
 	<!--METADATA-->
 
 	<metadatalist>
-		<metadata name='author'></metadata>
+		<metadata name='author'>Daniel Ethridge </metadata>
 	</metadatalist>
 
 
@@ -24,6 +24,16 @@
 		<objarg name='channels' optional='1' type='int'>
 			<digest>Number of channels in the LSL stream</digest>
 			<description>Number of channels in the LSL stream. </description>
+		</objarg>
+
+		<objarg name='Property name' optional='1'>
+			<digest>The property to set </digest>
+			<description>The property to set </description>
+		</objarg>
+
+		<objarg name='Stream Name' optional='1'>
+			<digest>The value of property </digest>
+			<description>The value of property </description>
 		</objarg>
 
 	</objarglist>

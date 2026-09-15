@@ -1,4 +1,6 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.10)
+cmake_policy(SET CMP0079 NEW)
+
 project(Min-DevKit)
 
 # set(USER_HOME)
@@ -62,8 +64,13 @@ foreach (project_dir ${PROJECT_DIRS})
 
         # target_include_directories
         target_link_libraries(${project_dir}
-            PUBLIC LSL::lsl
-            PUBLIC bml-dsp
+            PRIVATE LSL::lsl
+            PRIVATE bml-dsp
+        )
+
+        target_link_libraries(${project_dir}_test
+            PRIVATE LSL::lsl
+            PRIVATE bml-dsp
         )
 
         # find_package(LSL 1.13.0 REQUIRED

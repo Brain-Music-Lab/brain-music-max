@@ -14,18 +14,15 @@ include_directories(
 	"${C74_INCLUDES}"
 )
 
-
 set( SOURCE_FILES
 	${PROJECT_NAME}.cpp
 )
 
-
 add_library( 
-	${PROJECT_NAME} 
+	${PROJECT_NAME}
 	MODULE
 	${SOURCE_FILES}
 )
-
 
 include(${C74_MIN_API_DIR}/script/min-posttarget.cmake)
 
@@ -33,5 +30,14 @@ include(${C74_MIN_API_DIR}/script/min-posttarget.cmake)
 #############################################################
 # UNIT TEST
 #############################################################
+# set( SOURCE_FILES_test
+# 	${PROJECT_NAME}_test.cpp
+# )
+
+# add_library( 
+# 	${PROJECT_NAME}_test
+# 	MODULE
+# 	${SOURCE_FILES_test}
+# )
 
 include(${C74_MIN_API_DIR}/test/min-object-unittest.cmake)

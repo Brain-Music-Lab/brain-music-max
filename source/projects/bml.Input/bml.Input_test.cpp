@@ -1,61 +1,75 @@
-// /// @file
-// ///	@ingroup 	minexamples
-// ///	@copyright	Copyright 2018 The Min-DevKit Authors. All rights reserved.
-// ///	@license	Use of this source code is governed by the MIT License found in the License.md file.
+ /// @file
+ ///	@ingroup 	minexamples
+ ///	@copyright	Copyright 2018 The Min-DevKit Authors. All rights reserved.
+ ///	@license	Use of this source code is governed by the MIT License found in the License.md file.
 
-// #include "c74_min_unittest.h"     // required unit test header
-// #include "bml.Input.cpp"    // need the source of our object so that we can access it
+#define _CRT_SECURE_NO_WARNINGS
+ 
+#include "c74_min_unittest.h"     // required unit test header
+#include "bml.Input.cpp"    // need the source of our object so that we can access it
 
-// // Unit tests are written using the Catch framework as described at
-// // https://github.com/philsquared/Catch/blob/master/docs/tutorial.md
+// Unit tests are written using the Catch framework as described at
+// https://github.com/philsquared/Catch/blob/master/docs/tutorial.md
 
-// SCENARIO("object produces correct output") {
+namespace max = c74::max;
+
+SCENARIO("Testing how to test")
+{
+    ext_main(nullptr);
+
+    GIVEN("Default construction of the object")
+    {
+        mindev::test_wrapper<BMLInput> instance;
+        BMLInput& bmlInput = instance;
+
+        REQUIRE(bmlInput.getStreamPropertyValue() == "");
+        REQUIRE(bmlInput.getStreamProperty() == "");
+        REQUIRE(bmlInput.getNumChannels() == 8);
+    }
+    GIVEN("Construction with different parameters")
+    {
+        // BMLInput bmlInput({10});
+        // bmlInput.streamProperty = "test_property";
+        // bmlInput.streamPropValue = "test_value";
+
+        // REQUIRE(bmlInput.getStreamPropertyValue() == "test_property");
+        // REQUIRE(bmlInput.getStreamProperty() == "test_value");
+        // REQUIRE(bmlInput.getNumChannels() == 10);
+    }
+
+}
+
+// SCENARIO("Testing how to test") 
+// {
 //     ext_main(nullptr);    // every unit test must call ext_main() once to configure the class
 
-//     using namespace std::chrono_literals;
+//     GIVEN("A default instance of the object.")
+//     {
+//         // mindev::test_wrapper<BMLInput> instance;
+//         // BMLInput& bmlInput = instance;
 
-//     //	std::cout << "Hello waiter" << std::endl;
-//     //	auto start = std::chrono::high_resolution_clock::now();
-//     //	std::this_thread::sleep_for(2s);
-//     //	auto end = std::chrono::high_resolution_clock::now();
-//     //	std::chrono::duration<double, std::milli> elapsed = end-start;
-//     //	std::cout << "Waited " << elapsed.count() << " ms\n";
+//         // REQUIRE(true==true);
 
-//     GIVEN("An instance of our object") {
-
-//         mindev::test_wrapper<example> an_instance;
-//         example&              my_object = an_instance;
-
-//         // check that default attr values are correct
-
-//         REQUIRE(my_object.min == Approx(250.0));    // note: floating-point values may be subject to rounding errors
-//         REQUIRE(my_object.max == Approx(1500.0));
-
-//         // now proceed to testing various sequences of events
-
-//         INFO("When the defaults are used nothing is produced by the object after waiting 5 seconds")
-
-//         // 1. Wait for 5 seconds
-//         std::cout << "About to wait for 5 seconds..." << std::endl;
-//         std::this_thread::sleep_for(5s);
-//         std::cout << "done!" << std::endl;
-
-//         // 2. See if there was any output
-//         auto& output = *c74::max::object_getoutput(my_object, 0);
-//         REQUIRE(output.size() == 0);
-
-
-//         INFO("turning it on does produce output after waiting 5 seconds")
-
-//         my_object.on = true;
-
-//         // 1. Wait for 5 seconds
-//         std::cout << "About to wait for 5 seconds..." << std::endl;
-//         std::this_thread::sleep_for(5s);
-//         std::cout << "done!" << std::endl;
-
-//         // 2. See if there was any output
-//         output = *c74::max::object_getoutput(my_object, 0);
-//         REQUIRE(output.size() > 0);
+//         // REQUIRE(bmlInput.getStreamName() == "");
+//         // REQUIRE(bmlInput.getStreamProperty() == "");
+//         // REQUIRE(bmlInput.getNumChannels() == 6);
 //     }
+//     // AND_GIVEN("An instance with non-default attributes and arguments")
+//     // {
+//         // BMLInput* bmlInput = new BMLInput();
+
+//         // REQUIRE(bmlInput->getStreamName() == "");
+//         // REQUIRE(bmlInput->getStreamProperty() == "");
+//         // REQUIRE(bmlInput->getNumChannels() == 8);
+//     // }
+//     // AND_WHEN("a bang is received")
+//     // {
+//     //     bmlInput.get_data();
+//     //     THEN("We check the outlet to see")
+//     //     {
+//     //         auto& output = *max::object_getoutput(bmlInput, 0);
+//     //         REQUIRE(output.size() == 0);
+//     //     }
+
+//     // }
 // }
