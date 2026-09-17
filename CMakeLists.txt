@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.25)
 
 cmake_policy(SET CMP0079 NEW)
 set (CMAKE_CXX_STANDARD 17)
@@ -12,8 +12,8 @@ project(Min-DevKit)
 
 set(BUILD_SHARED_LIBS OFF)
 
-add_subdirectory(deps/liblsl)
 add_subdirectory(deps/bml-dsp)
+add_subdirectory(deps/liblsl)
 
 enable_testing()
 
@@ -50,7 +50,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/source/min-api/script/min-package.cmake)
 
 # Add the Lib, if it exists
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/source/min-lib/CMakeLists.txt")
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/source/min-lib)
+    # add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/source/min-lib SYSTEM)
 endif ()
 
 find_package(Threads REQUIRED)
@@ -61,8 +61,6 @@ foreach (project_dir ${PROJECT_DIRS})
     if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/source/projects/${project_dir}/CMakeLists.txt")
         message("Generating: ${project_dir}")
         add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/source/projects/${project_dir})
-
-        # target_compile_options(${project_dir} PUBLIC /MTd)
 
         # target_include_directories
         target_link_libraries(${project_dir}
