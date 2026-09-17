@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
+
 cmake_policy(SET CMP0079 NEW)
+set (CMAKE_CXX_STANDARD 17)
 
 project(Min-DevKit)
 
@@ -60,7 +62,7 @@ foreach (project_dir ${PROJECT_DIRS})
         message("Generating: ${project_dir}")
         add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/source/projects/${project_dir})
 
-        target_compile_options(${project_dir} PUBLIC /MTd)
+        # target_compile_options(${project_dir} PUBLIC /MTd)
 
         # target_include_directories
         target_link_libraries(${project_dir}
