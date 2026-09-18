@@ -64,6 +64,10 @@ foreach (project_dir ${PROJECT_DIRS})
         message("Generating: ${project_dir}")
         add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/source/projects/${project_dir})
 
+        if (WIN32)
+            target_compile_options(${project_dir} PUBLIC /MTd)
+        endif()
+
         # target_include_directories
         target_link_libraries(${project_dir}
             PRIVATE LSL::lsl

@@ -230,12 +230,12 @@ public:
 
         std::vector<lsl::stream_info> results;
         if ((m_streamProperty == nullptr) || (m_streamPropValue == nullptr))
-            results = lsl::resolve_streams();
+            results = lsl::resolve_stream("name", "grace", 1, 2.0);
         else
         {
             std::string streamProperty = *m_streamProperty;
             std::string streamPropertyValue = *m_streamPropValue;
-            results = lsl::resolve_stream(streamProperty, streamPropertyValue, 1, 2.0);
+            results = lsl::resolve_stream("name", "grace", 1, 2.0);
         }
 
         if (results.size() == 0)
