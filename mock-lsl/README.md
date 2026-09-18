@@ -9,7 +9,7 @@ From this directory, run the following commands in a terminal to set up the envi
 
 ## Running the stream
 Run the following:
-- `python -m pylsl.examples.SendData -s 1000 -n lsl_property_value -t lsl_property`
+- `python -m pylsl.examples.SendData -s 1000 -t lsl_property -n lsl_property_value`
 
 Once this is running, the c++ tests can be run successfully. The tests should also be run while there is no active LSL stream.
 

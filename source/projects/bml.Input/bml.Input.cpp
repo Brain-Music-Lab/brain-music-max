@@ -17,7 +17,6 @@ namespace mindev = c74::min;
 #include <string>
 #include <exception>
 
-
 const int DATA_INLET = 0;
 const int INFO_INLET = 1;
 
@@ -146,7 +145,6 @@ public:
             std::string message("Warning: No LSL Stream found!");
             cerr << message << mindev::endl;
             m_outlets[m_dumpOutIndex]->send(message);
-            std::cout << message << "\n";
             return {};
         }
     };
@@ -232,19 +230,18 @@ public:
 
         std::vector<lsl::stream_info> results;
         if ((m_streamProperty == nullptr) || (m_streamPropValue == nullptr))
-            throw std::runtime_error("nope");
+            results = lsl::resolve_streams();
         else
         {
             std::string streamProperty = *m_streamProperty;
             std::string streamPropertyValue = *m_streamPropValue;
-            std::cout << streamProperty << " " << streamPropertyValue << "\n";
-            results = lsl::resolve_stream("name", "grace");
-            std::cout << "should be starting some sort of thread " << results.size() << "\n";
+            results = lsl::resolve_stream(streamProperty, streamPropertyValue, 1, 2.0);
         }
 
         if (results.size() == 0)
         {
             noStreamFound.set();
+            std::cout << "Warning!: No LSL Stream Found\n";
             return;
         }
 

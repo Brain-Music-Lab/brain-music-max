@@ -5,6 +5,8 @@ set (CMAKE_CXX_STANDARD 17)
 
 project(Min-DevKit)
 
+add_compile_options(-w)
+
 # set(USER_HOME)
 # if (NOT USER_HOME)
 #     message(FATAL_ERROR "Variable 'USER_HOME' not set or incorrectly set. Rerun the cmake command with '-D USER_HOME=$HOME' appended.")
@@ -50,7 +52,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/source/min-api/script/min-package.cmake)
 
 # Add the Lib, if it exists
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/source/min-lib/CMakeLists.txt")
-    # add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/source/min-lib SYSTEM)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/source/min-lib SYSTEM)
 endif ()
 
 find_package(Threads REQUIRED)

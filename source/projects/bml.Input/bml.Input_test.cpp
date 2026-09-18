@@ -153,7 +153,7 @@ SCENARIO("Data inlet interactions")
         using namespace std::chrono_literals;
 
         bmlInput.call_onOff(DATA_INLET, mindev::atoms({1}));
-        std::this_thread::sleep_for(1000ms);
+        std::this_thread::sleep_for(2100ms);
         REQUIRE(bmlInput.lslRunning() == true);
 
         bmlInput.call_onOff(DATA_INLET, mindev::atoms({0}));
