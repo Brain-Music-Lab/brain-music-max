@@ -52,7 +52,7 @@ public:
             }
             else if (i == m_numChannels)
             {
-                ss << "Timestamps";
+                ss << "Timestamps Out";
                 m_timestampIndex = i;
             }
             else

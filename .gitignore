@@ -20,3 +20,4 @@ package-info.json
 Testing/
 .venv/
 scratch.*
+docs/

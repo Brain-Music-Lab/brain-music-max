@@ -3,7 +3,12 @@ cmake_minimum_required(VERSION 3.25)
 cmake_policy(SET CMP0079 NEW)
 set (CMAKE_CXX_STANDARD 17)
 
-project(Min-DevKit)
+project(Min-DevKit CXX)
+
+if (NOT DEFINED CMAKE_BUILD_TYPE)
+  message(WARNING "CMAKE_BUILD_TYPE not set. Defaulting to 'Release'.")
+  set(CMAKE_BUILD_TYPE Release)
+endif()
 
 add_compile_options(-w)
 add_subdirectory(deps/bml-dsp)
@@ -31,7 +36,11 @@ foreach (project_dir ${PROJECT_DIRS})
         add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/source/projects/${project_dir})
 
         if (WIN32)
-            target_compile_options(${project_dir} PUBLIC /MTd)
+            if (CMAKE_BUILD_TYPE STREQUAL Debug)
+                target_compile_options(${project_dir} PUBLIC /MTd)
+            else ()
+                target_compile_options(${project_dir} PUBLIC /MT)
+            endif()
         endif()
 
         # target_include_directories
@@ -45,19 +54,14 @@ foreach (project_dir ${PROJECT_DIRS})
             PRIVATE bml-dsp
         )
 
-        # find_package(LSL 1.13.0 REQUIRED
-        #     HINTS "C:\\Program Files (x86)\\liblsl\\lib\\cmake\\LSL")
-    
-        # target_include_directories(${project_dir}
-        #     PRIVATE
-        #     ${PROJECT_SOURCE_DIR}/deps/bml-dsp/vendor/fftw/include
-        #     "C:\\Program Files (x86)\\liblsl\\include"
-        #     ${PROJECT_SOURCE_DIR}/deps/bml-dsp/include)
-
-        
-
     endif ()
 endforeach ()
 
 # Comment the line below if you want automatic cmake regneration enabled
 set(CMAKE_SUPPRESS_REGENERATION true)
+
+# Copy DLL to necessary directories. Potentially not the most elegant solution, but it works
+if (WIN32)
+    file(COPY ${FFTW_DLL} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    file(COPY ${FFTW_DLL} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/externals)
+endif()

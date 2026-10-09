@@ -6,7 +6,8 @@
 #define _CRT_SECURE_NO_WARNINGS
  
 #include "c74_min_unittest.h"     // required unit test header
-#include "bml.Resample.cpp"    // need the source of our object so that we can access it
+#include "bml.Resample_tilde.cpp"    // need the source of our object so that we can access it
+#include "bml-dsp/"
 #include <thread>
 #include <chrono>
 #include <iostream>

@@ -13,7 +13,7 @@ namespace mindev = c74::min;
 const int DATA_INLET = 0;
 const int INFO_INLET = 1;
 
-class BMLResample : public mindev::object<BMLResample>
+class BMLResample : public mindev::object<BMLResample>, public mindev::vector_operator<>
 {
 
 public:
@@ -32,7 +32,8 @@ public:
         m_outputBuffers(),
         m_resamplers(),
         m_frameCount(0),
-        m_channelCount(0)
+        m_channelCount(0),
+        m_infoOutIdx(0)
     {
         if (args.size() > 0)
             m_numChannels = args[1];
@@ -50,15 +51,20 @@ public:
             }
             else
             {
-                ssIn << "LSL In" << i;
-                ssOut << "LSL Out " << i;
+                ssIn << "LSL In" << i + 1;
+                ssOut << "LSL Out " << i + 1;
             }
 
             auto inlet = std::make_unique<mindev::inlet<>>(this, ssIn.str(), "list");
-            auto outlet = std::make_unique<mindev::outlet<>>(this, ssOut.str(), "list");
             m_inlets.push_back(std::move(inlet));
+
+            auto outlet = std::make_unique<mindev::outlet<>>(this, ssOut.str(), "signal");
             m_outlets.push_back(std::move(outlet));
         }
+
+
+        auto outlet = std::make_unique<mindev::outlet<>>(this, "dumpout", "list");
+        m_outlets.push_back(std::move(outlet));
 
         for (int i = 0; i < m_numChannels; i++)
         {
@@ -67,6 +73,8 @@ public:
             m_outputBuffers.push_back(nullptr);
             m_resamplers.push_back(nullptr);
         }
+
+        m_infoOutIdx = m_numChannels + 1;
     }
 
     ~BMLResample()
@@ -78,8 +86,6 @@ public:
     MIN_TAGS{ "" };  // Any tags to include
     MIN_AUTHOR{ "Daniel Ethridge" };  // Author of the objectcmake
     MIN_RELATED{ "" };  // Related Max Objects
-
-    mindev::outlet<> signal_out { this, "Resampled LSL Out", "signal" };
 
     void call_dataIn(int inlet, const mindev::atoms& args) 
     {
@@ -152,29 +158,26 @@ public:
 
     void operator()(mindev::audio_bundle input, mindev::audio_bundle output)
     {
-        if (m_frameCount != output.channel_count() || m_channelCount != output.frame_count())
-        {
-            m_frameCount = output.frame_count();
-            m_channelCount = output.channel_count();
-            output_channel_count.set();
-        }
-        // size_t numChannels = static_cast<size_t>(output.channel_count());
-        // size_t frameCount = static_cast<size_t>(output.frame_count());
-
-        // std::vector<double> resampledData;
-
-        // for (size_t i = 0; i < channelCount; i++)
+        // if (m_frameCount != output.channel_count() || m_channelCount != output.frame_count())
         // {
-        //     resampledData = m_outputBuffers[i].get()->read(frameCount);
- 
-        //     // std::transform(
-        //     //     resampledData.begin(),
-        //     //     resampledData.end(),
-        //     //     output.samples(i),
-        //     //     [](double value) { return value; }
-        //     // );
-
+        //     m_frameCount = output.frame_count();
+        //     m_channelCount = output.channel_count();
+        //     output_channel_count.set();
         // }
+        size_t numChannels = static_cast<size_t>(output.channel_count());
+        size_t frameCount = static_cast<size_t>(output.frame_count());
+
+        std::vector<double> resampledData;
+        for (size_t i = 0; i < numChannels; i++)
+        {
+            resampledData = m_outputBuffers[i].get()->read(frameCount);
+            std::transform(
+                resampledData.begin(),
+                resampledData.end(),
+                output.samples(i),
+                [](double value) { return value; }
+            );
+        }
     }
 
 private:
@@ -197,6 +200,8 @@ private:
 
     long m_frameCount;
     long m_channelCount;
+
+    size_t m_infoOutIdx;
 };
 
 MIN_EXTERNAL(BMLResample);  
