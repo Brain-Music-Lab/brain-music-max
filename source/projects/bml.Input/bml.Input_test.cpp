@@ -64,13 +64,11 @@ SCENARIO("Info inlet interactions")
 
         for (int i = 0; i < bmlInput.getNumChannels(); i++)
         {
-            bmlInput.call_samplerateOut(INFO_INLET);
-            auto test& = c74::max::object_getoutput(bmlInput, 7);
+            // bmlInput.call_samplerateOut(INFO_INLET);
+            output = *c74::max::object_getoutput(bmlInput, i);
             // REQUIRE(output.size() == 0);
         }
     }
-
-
 
     AND_WHEN("The 'channelOut' message is passed")
     {
@@ -152,19 +150,19 @@ SCENARIO("Data inlet interactions")
         // }
     }
 
-    // TODO: THIS TEST DOESN'T WORK
-    // AND_WHEN("The 'onOff' message is passed")
-    // {
-    //     using namespace std::chrono_literals;
+    //TODO: THIS TEST DOESN'T WORK
+    AND_WHEN("The 'onOff' message is passed")
+    {
+        using namespace std::chrono_literals;
 
-    //     bmlInput.call_onOff(DATA_INLET, mindev::atoms({1}));
-    //     std::this_thread::sleep_for(2100ms);
-    //     REQUIRE(bmlInput.lslRunning() == true);
-
-    //     bmlInput.call_onOff(DATA_INLET, mindev::atoms({0}));
-    //     std::this_thread::sleep_for(1000ms);
-    //     REQUIRE(bmlInput.lslRunning() == false);
-    // }
+        bmlInput.call_onOff(DATA_INLET, mindev::atoms({1}));
+        std::this_thread::sleep_for(2100ms);
+        REQUIRE(bmlInput.lslRunning() == true);
+        std::this_thread::sleep_for(5000ms);
+        bmlInput.call_onOff(DATA_INLET, mindev::atoms({0}));
+        std::this_thread::sleep_for(1000ms);
+        REQUIRE(bmlInput.lslRunning() == false);
+    }
 
     // AND_WHEN("The 'getData' message is passed")
     // {

@@ -6,46 +6,12 @@ set (CMAKE_CXX_STANDARD 17)
 project(Min-DevKit)
 
 add_compile_options(-w)
-
-# set(USER_HOME)
-# if (NOT USER_HOME)
-#     message(FATAL_ERROR "Variable 'USER_HOME' not set or incorrectly set. Rerun the cmake command with '-D USER_HOME=$HOME' appended.")
-# endif (NOT USER_HOME)
-
-set(BUILD_SHARED_LIBS OFF)
-
 add_subdirectory(deps/bml-dsp)
 add_subdirectory(deps/liblsl)
 
 enable_testing()
 
 string(REGEX REPLACE "(.*)/" "" THIS_PACKAGE_NAME "${CMAKE_CURRENT_SOURCE_DIR}")
-
-# add_library(lib_fftw STATIC IMPORTED)
-# add_library(lib_lsl STATIC IMPORTED)
-# set_property(TARGET lib_fftw PROPERTY IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/deps/bml-dsp/vendor/fftw/lib/libfftw3-3.lib")
-# set_property(TARGET lib_lsl PROPERTY IMPORTED_LOCATION "C:\\Program Files (x86)\\liblsl\\lib\\lsl.lib")
-
-# if (APPLE)
-#     if (${CMAKE_GENERATOR} MATCHES "Xcode")
-#             if (${XCODE_VERSION} VERSION_LESS 10)
-#                 message(STATUS "Xcode 10 or higher is required. Please install from the Mac App Store.")
-#                 return ()
-#             elseif(${XCODE_VERSION} VERSION_GREATER_EQUAL 12)
-#                 set(C74_BUILD_FAT YES)
-#             endif ()
-#     endif ()
-
-#     if (NOT CMAKE_OSX_ARCHITECTURES)
-#         if(C74_BUILD_FAT)
-#             set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "macOS architecture" FORCE)
-#         else()
-#             set(CMAKE_OSX_ARCHITECTURES ${CMAKE_SYSTEM_PROCESSOR} CACHE STRING "macOS architecture" FORCE)
-#         endif()
-#         message("CMAKE_OSX_ARCHITECTURES set to ${CMAKE_OSX_ARCHITECTURES}")
-#     endif()
-# endif()
-
 
 # Misc setup and subroutines
 include(${CMAKE_CURRENT_SOURCE_DIR}/source/min-api/script/min-package.cmake)

@@ -18,29 +18,18 @@ To build the Max Externals on your system, you need:
 * CMake (version 3.19 or higher). See https://cmake.org/download/. Make sure cmake is added to the path.
 * Git. See https://git-scm.com/downloads. Make sure git is added to the path.
 
-## SSH Keys
-It is highly recommended to clone the repository using `ssh` instead of `https`. Cloning via `ssh` is much more secure. If you are unaware of the process for generating and utilizing ssh keys, follow the instructions below.
-1. Open a terminal of your choice.
-2. `ssh-keygen -t rsa`
-3. Take note of where it says the keys will be saved. Use the default save location. Hit enter.
-4. Optionally, set a password. 
-5. Once the keys are generated, navigate to the folder where the keys are stored in a file browser.
-6. You should see two files: `id_rsa` and `id_rsa.pub`. These are your public and private keys. Open the `.pub` file in any text editor.
-7. Copy the contents up to but not including your username located at the end of the file.
-8. Go to your github page, click your profile picture, click settings, click SSH and GPG keys, and click `New SSH key`.
-9. Paste what you copied in the `Key` box, give it any title, and click `Add SSH key`.
-
 ## Cloning
 * This repository must be cloned in the `Max 8/Packages` directory. Navigate there on the command line.
 * `git clone git@github.com:brain-music-lab/brain-music-max.git --recursive`
 
 ## Generating Project Files
+### Dependency: FFTW3
+
+
 * `cd brain-music-max`
 * `mkdir build`
 * `cd build`
 * `cmake ..`
-
-*Note that this step can also be accomplished using the dedicated CMake GUI installed with the CMake CLI from before.*
 
 ## Building from Project Files
 You have multiple options here. They are listed below

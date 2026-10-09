@@ -3,6 +3,7 @@
 #include "c74_min.h"  // Must include to access min devkit
 #include "lsl_cpp.h"
 #include "bml-dsp/circular-buffer.h"
+#include "bml-dsp/util/bml-math.h"
 #include <thread>
 #include <typeinfo>
 #include <memory>
@@ -41,13 +42,18 @@ public:
         if (args.size() > 0)
             m_numChannels = args[0];
 
-        for (int i = 0; i <= m_numChannels; i++)
+        for (int i = 0; i <= m_numChannels+1; i++)
         {
             std::stringstream ss;
-            if (i == m_numChannels)
+            if (i == m_numChannels+1)
             { 
                 ss << "Info Out";
                 m_dumpOutIndex = i;
+            }
+            else if (i == m_numChannels)
+            {
+                ss << "Timestamps";
+                m_timestampIndex = i;
             }
             else
             {
@@ -63,6 +69,8 @@ public:
             auto buffer = std::make_unique<BML::CircularBuffer>(2000);
             m_buffers.push_back(std::move(buffer));
         }
+        m_timestamps = std::make_unique<BML::CircularBuffer>(2000);
+        m_equalTimestamps = std::make_unique<BML::CircularBuffer>(2000);
     }
 
     ~BMLInput()
@@ -149,20 +157,33 @@ public:
         }
     };
 
-
-
     void call_getData(int inlet)
     {
         if (inlet != DATA_INLET) return;
 
+        std::vector<double> equalTimeValues = m_equalTimestamps->readNew();
+        std::vector<double> timeValues = m_timestamps->read(equalTimeValues.size());
+        m_timestamps->setWritePos(m_equalTimestamps->getWritePos());
+        m_timestamps->setReadPos(m_equalTimestamps->getReadPos());
+        std::vector<double> interpValues;
         for (int i = 0; i < m_numChannels; i++)
         {
-            std::vector<double> values = m_buffers[i]->readNew();
+            std::vector<double> values = m_buffers[i]->read(equalTimeValues.size());
+            m_buffers[i]->setWritePos(m_equalTimestamps->getWritePos());
+            m_buffers[i]->setReadPos(m_equalTimestamps->getReadPos());
             if (values.size() != 0)
             {
-                mindev::atoms outValues(values.begin(), values.end());
+                BML::Math::lerp(
+                    equalTimeValues,  // x
+                    timeValues,       // xp
+                    values,           // yp
+                    interpValues      // out
+                );
+                mindev::atoms outValues(interpValues.begin(), interpValues.end());
                 m_outlets[i]->send(outValues);
             }
+            mindev::atoms outTime(equalTimeValues.begin(), equalTimeValues.end());
+            m_outlets[m_timestampIndex]->send(outTime);
         }
     }
 
@@ -189,6 +210,8 @@ public:
                     std::ref(m_lslInlet), 
                     std::ref(m_running), 
                     std::ref(m_buffers),
+                    std::ref(m_timestamps),
+                    std::ref(m_equalTimestamps),
                     std::ref(m_outlets)
                 );
                 t.detach();
@@ -220,6 +243,8 @@ public:
         std::unique_ptr<lsl::stream_inlet>& lsl_inlet, 
         std::atomic_bool& running, 
         std::vector<std::unique_ptr<BML::CircularBuffer>>& bufs,
+        std::unique_ptr<BML::CircularBuffer>& timestamps,
+        std::unique_ptr<BML::CircularBuffer>& equalTimestamps,
         std::vector<std::unique_ptr<mindev::outlet<>>>& outlets)
     {
         // Don't initialize more than one
@@ -230,12 +255,12 @@ public:
 
         std::vector<lsl::stream_info> results;
         if ((m_streamProperty == nullptr) || (m_streamPropValue == nullptr))
-            results = lsl::resolve_stream("name", "grace", 1, 2.0);
+            results = lsl::resolve_stream("type", "EEG", 1, 2.0);
         else
         {
             std::string streamProperty = *m_streamProperty;
             std::string streamPropertyValue = *m_streamPropValue;
-            results = lsl::resolve_stream("name", "grace", 1, 2.0);
+            results = lsl::resolve_stream("type", "EEG", 1, 2.0);
         }
 
         if (results.size() == 0)
@@ -247,21 +272,28 @@ public:
 
         // Get lsl stream
         m_lslInlet = std::make_unique<lsl::stream_inlet>(results.at(0));
-        m_sr = m_lslInlet->info().nominal_srate();
+        double samplerate = m_lslInlet->info().nominal_srate();
+        m_sr = samplerate;
         m_nLslChannels = m_lslInlet->info().channel_count();
 
-        std::vector<float> samples;
-        double timestamp;
+        std::vector<double> samples;
 
         running = true;
+        double firstTimestamp = m_lslInlet->pull_sample(samples);
+        double timestamp = firstTimestamp;
+        double equalTimestamp = 0.0;
         while (running)
         {
-            timestamp = m_lslInlet->pull_sample(samples);
             for (int i = 0; i < m_numChannels; i++)
             {
                 if (samples.size() > i)
                     bufs[i]->write(samples[i]);
             }
+            timestamps->write(timestamp - firstTimestamp);
+            equalTimestamps->write(equalTimestamp);
+
+            timestamp = m_lslInlet->pull_sample(samples);
+            equalTimestamp += 1.0/samplerate;
         }
 
         m_sr = 0.0;
@@ -296,7 +328,10 @@ public:
     
 
 private:
+
     std::atomic_bool m_running;
+    std::unique_ptr<BML::CircularBuffer> m_timestamps;
+    std::unique_ptr<BML::CircularBuffer> m_equalTimestamps;
     std::vector<std::unique_ptr<BML::CircularBuffer>> m_buffers;
     std::mutex m_mut;
     std::string m_mess;
@@ -304,12 +339,14 @@ private:
 
     std::vector<std::unique_ptr<mindev::outlet<>>> m_outlets;
     int m_dumpOutIndex;
+    int m_timestampIndex;
     int m_numChannels;
     mindev::symbol* m_streamProperty;
     mindev::symbol* m_streamPropValue;
 
     mindev::atom m_sr;
     mindev::atom m_nLslChannels;
+
 };
 
 MIN_EXTERNAL(BMLInput);  
