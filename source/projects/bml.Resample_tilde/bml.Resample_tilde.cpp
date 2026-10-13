@@ -20,10 +20,10 @@ public:
 
     BMLResample(const mindev::atoms& args = {}) :
         m_timestampIndex(0),
-        m_numChannels(8),
+        m_numChannels(1),
         m_oldFs(512.0),
         m_newFs(0.0),
-        m_transitionBandwidth(50.0),
+        m_transitionBandwidth(150.0),
         m_inlets(),
         m_outlets(),
         m_inputTime(),
@@ -68,7 +68,7 @@ public:
 
         for (int i = 0; i < m_numChannels; i++)
         {
-            auto buffer = std::make_unique<BML::CircularBuffer>(5);
+            auto buffer = std::make_unique<BML::CircularBuffer>(m_newFs);
             m_inputBuffers.push_back(std::move(buffer));
             m_outputBuffers.push_back(nullptr);
             m_resamplers.push_back(nullptr);
@@ -108,10 +108,9 @@ public:
         }
         else
         {
-            m_inputBuffers[inlet].get()->write(std::vector<double>(args.begin(), args.end()));
-            m_outputBuffers[inlet].get()->write(
-                m_resamplers[inlet].get()->operator()(std::vector<double>(args.begin(), args.end()))
-            );
+            std::vector<double> dataIn(args.begin(), args.end());
+            m_resamplers[inlet].get()->operator()(dataIn, m_resampleResult);
+            m_outputBuffers[inlet].get()->write(m_resampleResult);  // Write that to the output buffer
         }
     }
 
@@ -127,16 +126,9 @@ public:
         MIN_FUNCTION {
             m_newFs = static_cast<double>(args[0]);
 
-            size_t halfSamplerate;
-            if ((static_cast<size_t>(m_newFs) % 2) == 0)
-                halfSamplerate = static_cast<size_t>(m_newFs/2.0);
-            else
-                halfSamplerate = static_cast<size_t>((m_newFs-1) / 2.0);
-
             for (int i = 0; i < m_outputBuffers.size(); i++)
             {
-                // m_outputBuffers[i] = std::make_unique<BML::CircularBuffer>(halfSamplerate);
-                m_outputBuffers[i] = std::make_unique<BML::CircularBuffer>(10);
+                m_outputBuffers[i] = std::make_unique<BML::CircularBuffer>(m_oldFs);
                 m_resamplers[i] = std::make_unique<BML::RealTime::Resample>(m_oldFs, m_newFs, m_transitionBandwidth);
             }
 
@@ -180,6 +172,11 @@ public:
         }
     }
 
+    size_t TapsInResampleFilter()
+    {
+        return m_resamplers[0].get()->Taps();
+    }
+
 private:
     int m_numChannels;
     int m_timestampIndex;
@@ -197,6 +194,7 @@ private:
     std::vector<std::unique_ptr<BML::CircularBuffer>> m_outputBuffers;
 
     std::vector<std::unique_ptr<BML::RealTime::Resample>> m_resamplers;
+    std::vector<double> m_resampleResult;
 
     long m_frameCount;
     long m_channelCount;

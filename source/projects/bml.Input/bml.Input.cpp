@@ -32,7 +32,7 @@ public:
         m_mut(),
         m_mess(),
         m_outlets(),
-        m_dumpOutIndex(0),
+        m_infoOutIndex(0),
         m_numChannels(8),
         m_streamPropValue(),
         m_streamProperty(),
@@ -48,7 +48,7 @@ public:
             if (i == m_numChannels+1)
             { 
                 ss << "Info Out";
-                m_dumpOutIndex = i;
+                m_infoOutIndex = i;
             }
             else if (i == m_numChannels)
             {
@@ -152,7 +152,7 @@ public:
         {
             std::string message("Warning: No LSL Stream found!");
             cerr << message << mindev::endl;
-            m_outlets[m_dumpOutIndex]->send(message);
+            m_outlets[m_infoOutIndex]->send(message);
             return {};
         }
     };
@@ -228,7 +228,7 @@ public:
         if (inlet != INFO_INLET)
             return;
             
-        m_outlets[m_dumpOutIndex]->send(m_nLslChannels);
+        m_outlets[m_infoOutIndex]->send(m_nLslChannels);
     }
 
     void call_samplerateOut(int inlet)
@@ -236,7 +236,7 @@ public:
         if (inlet != INFO_INLET)
             return;
 
-        m_outlets[m_dumpOutIndex]->send(m_sr);
+        m_outlets[m_infoOutIndex]->send(m_sr);
     }
 
     void initializeAndReadLsl(
@@ -338,7 +338,7 @@ private:
     std::unique_ptr<lsl::stream_inlet> m_lslInlet;
 
     std::vector<std::unique_ptr<mindev::outlet<>>> m_outlets;
-    int m_dumpOutIndex;
+    int m_infoOutIndex;
     int m_timestampIndex;
     int m_numChannels;
     mindev::symbol* m_streamProperty;

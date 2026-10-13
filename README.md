@@ -29,7 +29,7 @@ To build the Max Externals on your system, you need:
 * `cd brain-music-max`
 * `mkdir build`
 * `cd build`
-* `cmake ..`
+* `cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5`
 
 ## Building from Project Files
 You have multiple options here. They are listed below

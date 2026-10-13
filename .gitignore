@@ -21,3 +21,4 @@ Testing/
 .venv/
 scratch.*
 docs/
+FlameGraph/
