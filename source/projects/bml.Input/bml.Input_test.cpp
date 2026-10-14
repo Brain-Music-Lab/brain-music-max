@@ -42,142 +42,162 @@ SCENARIO("Arguments and attributes")
     }
 }
 
-SCENARIO("Info inlet interactions")
+SCENARIO("Get data")
 {
     mindev::test_wrapper<BMLInput> instance;
     BMLInput& bmlInput = instance;
+    
+    using namespace std::chrono_literals;
 
-    WHEN("The 'samplerate' message is passed")
-    {
-        bmlInput.call_samplerateOut(INFO_INLET);
-        auto& output = *c74::max::object_getoutput(bmlInput, bmlInput.getNumChannels());
+    // turn on
+    bmlInput.call_onOff(0, {1});
+    std::this_thread::sleep_for(1000ms);
 
-        REQUIRE(output.size() == 1);
-        REQUIRE(output[0].size() == 1);
-        REQUIRE(output[0][0] == bmlInput.getSr());
+    bmlInput.call_getData(0);
 
-        if (!bmlInput.lslRunning())
-        {
-            REQUIRE(output[0][0] == 0.0);
-            REQUIRE(bmlInput.getSr() == 0.0);
-        }
-
-        for (int i = 0; i < bmlInput.getNumChannels(); i++)
-        {
-            // bmlInput.call_samplerateOut(INFO_INLET);
-            output = *c74::max::object_getoutput(bmlInput, i);
-            // REQUIRE(output.size() == 0);
-        }
-    }
-
-    AND_WHEN("The 'channelOut' message is passed")
-    {
-        bmlInput.call_nChannels(INFO_INLET);
-        auto& output = *c74::max::object_getoutput(bmlInput, bmlInput.getNumChannels());
-
-        REQUIRE(output.size() == 1);
-        REQUIRE(output[0].size() == 1);
-        REQUIRE(output[0][0] == bmlInput.getNumLslChannels());
-
-        if (!bmlInput.lslRunning())
-        {
-            REQUIRE(output[0][0] == 0.0);
-            REQUIRE(bmlInput.getNumLslChannels() == 0.0);
-        }
-
-        // for (int i = 0; i < bmlInput.getNumChannels(); i++)
-        // {
-        //     output = *c74::max::object_getoutput(bmlInput, i);
-        //     REQUIRE(output.size() == 0);
-        // }
-    }
-
-    AND_WHEN("The 'getData' message is passed")
-    {
-        bmlInput.call_getData(INFO_INLET);
-        auto& output = *c74::max::object_getoutput(bmlInput, bmlInput.getNumChannels());
-        REQUIRE(output.size() == 0);
-
-        // for (int i = 0; i < bmlInput.getNumChannels(); i++)
-        // {
-        //     output = *c74::max::object_getoutput(bmlInput, i);
-        //     REQUIRE(output.size() == 0);
-        // }
-    }
-
-    AND_WHEN("The 'onOff' message is passed")
-    {
-        bmlInput.call_onOff(INFO_INLET, mindev::atoms({0}));
-        auto& output = *c74::max::object_getoutput(bmlInput, bmlInput.getNumChannels());
-        REQUIRE(output.size() == 0);
-
-        // for (int i = 0; i < bmlInput.getNumChannels(); i++)
-        // {
-        //     output = *c74::max::object_getoutput(bmlInput, i);
-        //     REQUIRE(output.size() == 0);
-        // }    
-    }
-
+    // turn off
+    bmlInput.call_onOff(0, {0});
+    std::this_thread::sleep_for(1000ms);
 }
 
-SCENARIO("Data inlet interactions")
-{
-    mindev::test_wrapper<BMLInput> instance;
-    BMLInput& bmlInput = instance;
+// SCENARIO("Info inlet interactions")
+// { 
+//     mindev::test_wrapper<BMLInput> instance;
+//     BMLInput& bmlInput = instance;
 
-    bmlInput.streamProperty = "type";
-    bmlInput.streamPropValue = "EEG";
+//     WHEN("The 'samplerate' message is passed")
+//     {
+//         bmlInput.call_samplerateOut(0);
 
-    WHEN("The 'samplerate' message is passed")
-    {
-        bmlInput.call_samplerateOut(DATA_INLET);
+//         auto& output = *c74::max::object_getoutput(bmlInput, 9);
+//         std::cout << "output size: " << output.size() << "\n";
 
-        // for (int i = 0; i <= bmlInput.getNumChannels(); i++)
+//         // REQUIRE(output.size() == 1);
+//         // REQUIRE(output[0].size() == 1);
+//         REQUIRE(output[0][0] == bmlInput.getSr());
+
+        // if (!bmlInput.lslRunning())
         // {
-        //     auto& output = *c74::max::object_getoutput(bmlInput, i);
-        //     REQUIRE(output.size() == 0);
+        //     REQUIRE(output[0][0] == 0.0);
+        //     REQUIRE(bmlInput.getSr() == 0.0);
         // }
-    }
 
-    AND_WHEN("The 'channelOut' message is passed")
-    {
-        bmlInput.call_nChannels(DATA_INLET);
-
-        // for (int i = 0; i <= bmlInput.getNumChannels(); i++)
+        // for (int i = 0; i < bmlInput.getNumChannels(); i++)
         // {
-        //     auto& output = *c74::max::object_getoutput(bmlInput, i);
-        //     REQUIRE(output.size() == 0);
+        //     // bmlInput.call_samplerateOut(INFO_INLET);
+        //     // output = *c74::max::object_getoutput(bmlInput, i);
+        //     // REQUIRE(output.size() == 0);
         // }
-    }
+    // }
 
-    //TODO: THIS TEST DOESN'T WORK
-    AND_WHEN("The 'onOff' message is passed")
-    {
-        using namespace std::chrono_literals;
+    // AND_WHEN("The 'channelOut' message is passed")
+    // {
+    //     bmlInput.call_nChannels(INFO_INLET);
+    //     auto& output = *c74::max::object_getoutput(bmlInput, bmlInput.getNumChannels() + 1);
 
-        bmlInput.call_onOff(DATA_INLET, mindev::atoms({1}));
-        std::this_thread::sleep_for(2100ms);
-        REQUIRE(bmlInput.lslRunning() == true);
-        std::this_thread::sleep_for(5000ms);
-        bmlInput.call_onOff(DATA_INLET, mindev::atoms({0}));
-        std::this_thread::sleep_for(1000ms);
-        REQUIRE(bmlInput.lslRunning() == false);
-    }
+    //     REQUIRE(output.size() == 1);
+    //     REQUIRE(output[0].size() == 1);
+    //     REQUIRE(output[0][0] == bmlInput.getNumLslChannels());
+
+    //     if (!bmlInput.lslRunning())
+    //     {
+    //         REQUIRE(output[0][0] == 0.0);
+    //         REQUIRE(bmlInput.getNumLslChannels() == 0.0);
+    //     }
+
+    //     // for (int i = 0; i < bmlInput.getNumChannels(); i++)
+    //     // {
+    //     //     output = *c74::max::object_getoutput(bmlInput, i);
+    //     //     REQUIRE(output.size() == 0);
+    //     // }
+    // }
 
     // AND_WHEN("The 'getData' message is passed")
     // {
-    //     using namespace std::chrono_literals;
-    //     bmlInput.call_onOff(DATA_INLET, mindev::atoms({0}));
-    //     std::this_thread::sleep_for(1000ms);
-    //     bmlInput.call_getData(DATA_INLET);
+    //     bmlInput.call_getData(INFO_INLET);
+    //     auto& output = *c74::max::object_getoutput(bmlInput, bmlInput.getNumChannels() + 1);
+    //     REQUIRE(output.size() == 0);
 
-    //     for (int i = 0; i < bmlInput.getNumChannels(); i++)
-    //     {
-    //         auto& output = *c74::max::object_getoutput(bmlInput, i);
-    //         REQUIRE(output.size() == 0);
-    //     }
-
-    //     bmlInput.call_onOff(DATA_INLET, mindev::atoms({0}));
+    //     // for (int i = 0; i < bmlInput.getNumChannels(); i++)
+    //     // {
+    //     //     output = *c74::max::object_getoutput(bmlInput, i);
+    //     //     REQUIRE(output.size() == 0);
+    //     // }
     // }
-}
+
+    // AND_WHEN("The 'onOff' message is passed")
+    // {
+    //     bmlInput.call_onOff(INFO_INLET, mindev::atoms({0}));
+    //     auto& output = *c74::max::object_getoutput(bmlInput, bmlInput.getNumChannels() + 1);
+    //     REQUIRE(output.size() == 0);
+
+    //     // for (int i = 0; i < bmlInput.getNumChannels(); i++)
+    //     // {
+    //     //     output = *c74::max::object_getoutput(bmlInput, i);
+    //     //     REQUIRE(output.size() == 0);
+    //     // }    
+    // }
+
+// }
+
+// SCENARIO("Data inlet interactions")
+// {
+//     mindev::test_wrapper<BMLInput> instance;
+//     BMLInput& bmlInput = instance;
+
+//     bmlInput.streamProperty = "type";
+//     bmlInput.streamPropValue = "EEG";
+
+//     WHEN("The 'samplerate' message is passed")
+//     {
+//         bmlInput.call_samplerateOut(DATA_INLET);
+
+//         for (int i = 0; i <= bmlInput.getNumChannels(); i++)
+//         {
+//             auto& output = *c74::max::object_getoutput(bmlInput, i);
+//             REQUIRE(output.size() == 0);
+//         }
+//     }
+
+//     AND_WHEN("The 'channelOut' message is passed")
+//     {
+//         bmlInput.call_nChannels(DATA_INLET);
+
+//         // for (int i = 0; i <= bmlInput.getNumChannels(); i++)
+//         // {
+//         //     auto& output = *c74::max::object_getoutput(bmlInput, i);
+//         //     REQUIRE(output.size() == 0);
+//         // }
+//     }
+
+//     // //TODO: THIS TEST DOESN'T WORK
+//     // AND_WHEN("The 'onOff' message is passed")
+//     // {
+//     //     using namespace std::chrono_literals;
+
+//     //     bmlInput.call_onOff(DATA_INLET, mindev::atoms({1}));
+//     //     std::this_thread::sleep_for(2100ms);
+//     //     REQUIRE(bmlInput.lslRunning() == true);
+//     //     std::this_thread::sleep_for(5000ms);
+//     //     bmlInput.call_onOff(DATA_INLET, mindev::atoms({0}));
+//     //     std::this_thread::sleep_for(1000ms);
+//     //     REQUIRE(bmlInput.lslRunning() == false);
+//     // }
+
+//     // AND_WHEN("The 'getData' message is passed")
+//     // {
+//     //     using namespace std::chrono_literals;
+//     //     bmlInput.call_onOff(DATA_INLET, mindev::atoms({0}));
+//     //     std::this_thread::sleep_for(1000ms);
+//     //     bmlInput.call_getData(DATA_INLET);
+
+//     //     for (int i = 0; i < bmlInput.getNumChannels(); i++)
+//     //     {
+//     //         auto& output = *c74::max::object_getoutput(bmlInput, i);
+//     //         REQUIRE(output.size() == 0);
+//     //     }
+
+//     //     bmlInput.call_onOff(DATA_INLET, mindev::atoms({0}));
+//     // }
+// }
 

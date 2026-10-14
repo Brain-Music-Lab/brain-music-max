@@ -5,9 +5,11 @@ set (CMAKE_CXX_STANDARD 17)
 
 project(Min-DevKit CXX)
 
-if (NOT DEFINED CMAKE_BUILD_TYPE)
-  message(WARNING "CMAKE_BUILD_TYPE not set. Defaulting to 'Release'.")
-  set(CMAKE_BUILD_TYPE Release)
+if (!WIN32)
+    if (NOT DEFINED CMAKE_BUILD_TYPE)
+        message(WARNING "CMAKE_BUILD_TYPE not set. Defaulting to 'Release'.")
+        set(CMAKE_BUILD_TYPE Release)
+    endif()
 endif()
 
 add_compile_options(-w)
@@ -34,14 +36,6 @@ foreach (project_dir ${PROJECT_DIRS})
     if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/source/projects/${project_dir}/CMakeLists.txt")
         message("Generating: ${project_dir}")
         add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/source/projects/${project_dir})
-
-        if (WIN32)
-            if (CMAKE_BUILD_TYPE STREQUAL Debug)
-                target_compile_options(${project_dir} PUBLIC /MTd)
-            else ()
-                target_compile_options(${project_dir} PUBLIC /MT)
-            endif()
-        endif()
 
         # target_include_directories
         target_link_libraries(${project_dir}
